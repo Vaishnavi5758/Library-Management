@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="./index.css">
+
+</head>
+<body>
+    <h2>Add Book to DB Form</h2>
+
+    <nav>
+        <ul>
+            <!-- <li><a href="/"  >Home</a></li> -->
+            <li><a href="/showallusers.html" id="showallusers" > Show All User's Books</a></li>
+          
+        </ul>
+
+  <form id="returnBookForm">
+    <label for="bookName">Book Name:</label>
+    <input type="text" id="bookName" name="bookName" required><br>
+
+    <label for="bookTakenOn">Book Taken On Date:</label>
+    <input type="date" id="bookTakenOn" name="bookTakenOn" required><br>
+
+    <label for="bookReturnDate">Book Return Date:</label>
+    <input type="date" id="bookReturnDate" name="bookReturnDate" required><br>
+
+    <label for="currentFare">Current Fare:</label>
+    <input type="number" id="currentFare" name="currentFare" step="0.01" readonly><br>
+
+    <button type="button" onclick="calculateFare()">Calculate Fare</button>
+    <button type="button" onclick="returnBook()">Add book to DB </button>
+  </form>
+
+  <script>
+    function calculateFare() {
+      const bookTakenOn = new Date(document.getElementById('bookTakenOn').value);
+      const bookReturnDate = new Date(document.getElementById('bookReturnDate').value);
+      const currentTime = new Date();
+
+// Calculate the difference between current time and book taken time
+    const timeDifference = bookReturnDate - bookTakenOn;
+     const hoursDifference = Math.ceil(timeDifference / (1000 * 60 * 60));
+
+      const hourlyRate = 10; // Rs per hour
+      const currentFare = hoursDifference * hourlyRate;
+
+      document.getElementById('currentFare').value = currentFare.toFixed(2);
+    }
+
+    function returnBook() {
+      // Get form data
+      const bookName = document.getElementById('bookName').value;
+      const bookTakenOn = document.getElementById('bookTakenOn').value;
+      const bookReturnDate = document.getElementById('bookReturnDate').value;
+      const currentFare = document.getElementById('currentFare').value;
+
+      // Make Axios POST request
+      axios.post('http://localhost:3000/AddBookToDB', {
+        bookName: bookName,
+        bookTakenOn: bookTakenOn,
+        bookReturnDate: bookReturnDate,
+        currentFare: currentFare
+      })
+      .then(function (response) {
+        // Handle success, e.g., show a success message
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        // Handle error, e.g., show an error message
+        console.error(error);
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Search</title>
+  <!-- Include Axios library -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="./showallusers.css">
+</head>
+<body>
+
+  <h2>Book Search</h2>
+
+  <form id="searchForm">
+    <label for="searchTerm">Search Book:</label>
+    <input type="text" id="searchTerm" name="searchTerm" placeholder="Enter book name">
+    <button type="button" onclick="showBooks()">Show Books to be returned with fine</button>
+  </form>
+
+  <div id="bookResults">
+    <!-- Display book results here -->
+  </div>
+
+  <script>
+    async function showBooks() {
+      // Get the search term from the input
+      const searchTerm = document.getElementById('searchTerm').value;
+
+      // Fetch books by name from the server using Axios
+      try {
+        const response = await axios.get(`http://localhost:3000/findBooksByName?bookName=${encodeURIComponent(searchTerm)}`);
+        const books = response.data;
+
+        // Update the bookResults div with the fetched results
+        const bookResultsDiv = document.getElementById('bookResults');
+        bookResultsDiv.innerHTML = ''; // Clear previous results
+
+        if (books.length === 0) {
+          bookResultsDiv.innerHTML = '<p>No books found</p>';
+        } else {
+          const ul = document.createElement('ul');
+          books.forEach(book => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <p>Book ID: ${book.id}, Name: ${book.bookName}, Taken On: ${book.bookTakenOn}, Return Date: ${book.bookReturnDate}, Fare: ${book.currentFare}</p>
+              <button onclick="payFine(${book.id}, this)">Pay Fine</button>
+            `;
+            ul.appendChild(li);
+          });
+          bookResultsDiv.appendChild(ul);
+        }
+      } catch (error) {
+        console.error('Error fetching books:', error);
+        // Handle error (display an error message, etc.)
+      }
+    }
+    async function payFine(bookId, buttonElement) {
+  try {
+    // Send a request to the server to update finePaid status
+    const response = await axios.post('http://localhost:3000/payFine', { bookId });
+
+    // Handle the response from the server
+    const { message, book } = response.data;
+
+    console.log(message);
+
+    // Add the 'greyed-out' class to the parent li element
+    const liElement = buttonElement.closest('li');
+    liElement.classList.add('greyed-out');
+  } catch (error) {
+    console.error('Error paying fine:', error);
+    // Handle error (display an error message, etc.)
+  }
+}
+
+  </script>
+
+</body>
+</html>
